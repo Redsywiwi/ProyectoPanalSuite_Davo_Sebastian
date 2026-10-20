@@ -14,7 +14,7 @@ import com.example.panalsuite.R
 import com.example.panalsuite.model.Role
 
 // Que contenido muestra cada tab
-enum class TabType { HOME, TICKETS, OTHER, PROFILE }
+enum class TabType { HOME, TICKETS, TEAM, SUMMARY, ADMIN, OTHER, PROFILE }
 
 data class BottomTab(
     @StringRes
@@ -26,7 +26,6 @@ data class BottomTab(
 private val HomeTab = BottomTab(R.string.tab_home, Icons.Rounded.Home, TabType.HOME)
 private val ProfileTab = BottomTab(R.string.tab_profile, Icons.Rounded.Person, TabType.PROFILE)
 
-// Pestañas de la barra inferior según el rol
 fun Role.bottomTabs(): List<BottomTab> = when (this) {
     Role.CommonUser -> listOf(
         HomeTab,
@@ -34,23 +33,21 @@ fun Role.bottomTabs(): List<BottomTab> = when (this) {
         ProfileTab
     )
     Role.Operator -> listOf(
-        HomeTab,
         BottomTab(R.string.tab_assigned, Icons.Rounded.AssignmentInd, TabType.TICKETS),
         ProfileTab
     )
     Role.Supervisor -> listOf(
         HomeTab,
-        BottomTab(R.string.tab_team, Icons.Rounded.Groups, TabType.OTHER),
+        BottomTab(R.string.tab_team, Icons.Rounded.Groups, TabType.TEAM),
         ProfileTab
     )
     Role.Management -> listOf(
         HomeTab,
-        BottomTab(R.string.tab_summary, Icons.Rounded.BarChart, TabType.OTHER),
+        BottomTab(R.string.tab_summary, Icons.Rounded.BarChart, TabType.SUMMARY),
         ProfileTab
     )
     Role.Administrator -> listOf(
-        HomeTab,
-        BottomTab(R.string.tab_manage, Icons.Rounded.AdminPanelSettings, TabType.OTHER),
+        BottomTab(R.string.tab_manage, Icons.Rounded.AdminPanelSettings, TabType.ADMIN),
         ProfileTab
     )
 }

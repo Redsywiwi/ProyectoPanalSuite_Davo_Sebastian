@@ -45,17 +45,16 @@ fun AppNavigation(
 ) {
     val context = LocalContext.current
     val userRepository = remember { UserRepository(context) }
-    val testUsers = remember { userRepository.getUsers() }
     var loginError by remember { mutableStateOf<String?>(null) }
 
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN
+        startDestination = if (Session.currentUser != null) Routes.HOME else Routes.LOGIN
     ) {
         composable(Routes.LOGIN) {
             LoginScreen(
                 errorMessage = loginError,
-                testUsers = testUsers,
+                testUsers = userRepository.getUsers(),
                 onLoginClick = { email, password ->
                     val user = userRepository.authenticate(email.trim(), password)
                     if (user != null) {

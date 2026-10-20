@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.example.panalsuite.R
 import com.example.panalsuite.model.Location
 import com.example.panalsuite.model.Urgency
+import com.example.panalsuite.repository.ParametersRepository
 import com.example.panalsuite.repository.Session
 import com.example.panalsuite.repository.TicketRepository
 
@@ -50,9 +51,13 @@ fun NewTicketScreen(
     val user = Session.currentUser ?: return
 
     var title by rememberSaveable { mutableStateOf("") }
+    val categories = ParametersRepository.getCategories()
+    val locations = ParametersRepository.getLocations()
+
     var category by rememberSaveable { mutableStateOf("") }
     var priority by rememberSaveable { mutableStateOf<Urgency?>(null) }
-    var location by rememberSaveable { mutableStateOf<Location?>(null) }
+    var locationId by rememberSaveable { mutableStateOf<Long?>(null) }
+    val location: Location? = locations.firstOrNull { it.idLocation == locationId }
     var description by rememberSaveable { mutableStateOf("") }
 
     val canSubmit = title.isNotBlank() &&
@@ -100,13 +105,12 @@ fun NewTicketScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
             )
 
-            OutlinedTextField(
-                value = category,
-                onValueChange = { category = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.new_ticket_field_category)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
+            DropdownField(
+                label = stringResource(R.string.new_ticket_field_category),
+                selected = category.ifBlank { null },
+                options = categories,
+                optionLabel = { it },
+                onSelected = { category = it }
             )
 
             DropdownField(
@@ -120,9 +124,9 @@ fun NewTicketScreen(
             DropdownField(
                 label = stringResource(R.string.new_ticket_field_location),
                 selected = location,
-                options = Location.entries,
-                optionLabel = { it.Locations },
-                onSelected = { location = it }
+                options = locations,
+                optionLabel = { it.name },
+                onSelected = { locationId = it.idLocation }
             )
 
             OutlinedTextField(

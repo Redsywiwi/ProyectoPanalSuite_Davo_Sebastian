@@ -16,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.R
 import com.example.panalsuite.model.Ticket
+import com.example.panalsuite.repository.UserRepository
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -36,6 +39,9 @@ fun TicketCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
+    val usersById = remember { UserRepository(context).getUsers().associateBy { it.idUser } }
+
     TicketCard(
         modifier = modifier,
         ticketNumber = stringResource(R.string.ticket_number_format, ticket.idTicket),
@@ -43,8 +49,9 @@ fun TicketCard(
         title = ticket.title,
         description = ticket.description,
         priority = ticket.priority.priorityName,
-        assignedName = ticket.peopleInCharge?.let {
-            stringResource(R.string.ticket_assigned_format, it)
+        assignedName = ticket.peopleInCharge?.let { id ->
+            usersById[id]?.let { "${it.name} ${it.lastName}" }
+                ?: stringResource(R.string.ticket_assigned_format, id)
         } ?: stringResource(R.string.ticket_unassigned),
         lastUpdate = stringResource(
             R.string.ticket_updated_format,

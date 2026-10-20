@@ -1,7 +1,7 @@
 [
   { "idUser": 1,
     "name": "Redsy",
-    "lastName": "Shinobi de los juegos",
+    "lastName": "Raccoon",
     "email": "commonuser@gmail.com",
     "password": "1",
     "role": "CommonUser",
@@ -9,6 +9,24 @@
   },
 
   { "idUser": 2,
+    "name": "Aki",
+    "lastName": "Repanda",
+    "email": "commonuser2@gmail.com",
+    "password": "1",
+    "role": "CommonUser",
+    "active": true
+  },
+
+  { "idUser": 3,
+    "name": "Myo",
+    "lastName": "Bearsu",
+    "email": "commonuser3@gmail.com",
+    "password": "1",
+    "role": "CommonUser",
+    "active": true
+  },
+
+  { "idUser": 4,
     "name": "Kofi",
     "lastName": "Wah",
     "email": "operator@gmail.com",
@@ -17,7 +35,43 @@
     "active": true
   },
 
-  { "idUser": 3,
+  { "idUser": 5,
+    "name": "Macu",
+    "lastName": "Waton",
+    "email": "operator2@gmail.com",
+    "password": "1",
+    "role": "Operator",
+    "active": true
+  },
+
+  { "idUser": 6,
+    "name": "Manchas",
+    "lastName": "Yuchudui",
+    "email": "operator3@gmail.com",
+    "password": "1",
+    "role": "Operator",
+    "active": true
+  },
+
+  { "idUser": 7,
+    "name": "Naru",
+    "lastName": "Waton",
+    "email": "operator4@gmail.com",
+    "password": "1",
+    "role": "Operator",
+    "active": true
+  },
+
+  { "idUser": 8,
+    "name": "Yoba",
+    "lastName": "Waton",
+    "email": "operator5@gmail.com",
+    "password": "1",
+    "role": "Operator",
+    "active": true
+  },
+
+  { "idUser": 9,
     "name": "Goku",
     "lastName": "le gana",
     "email": "supervisor@gmail.com",
@@ -26,7 +80,7 @@
     "active": true
   },
 
-  { "idUser": 4,
+  { "idUser": 10,
     "name": "Rambley",
     "lastName": "the raccoon",
     "email": "management@gmail.com",
@@ -35,7 +89,7 @@
     "active": true
   },
 
-  { "idUser": 5,
+  { "idUser": 11,
     "name": "Livelyapio",
     "lastName": "Panzon",
     "email": "admin@gmail.com",
@@ -43,4 +97,5 @@
     "role": "Administrator",
     "active": true
   }
+
 ]

@@ -82,6 +82,8 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.ImageDecoderDecoder // Para API 28+
 import android.os.Build
+import android.widget.Toast
+import com.example.panalsuite.repository.DemoData
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import android.media.MediaPlayer
@@ -108,6 +110,8 @@ fun LoginScreen(
     var showTestMenu by rememberSaveable { mutableStateOf(false) }
     var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) { isContentVisible = true }
 
     Box(
@@ -125,6 +129,15 @@ fun LoginScreen(
                     email = user.email
                     password = user.password
                     showTestMenu = false
+                },
+                onAutofill = {
+                    val result = DemoData.load()
+                    val message = if (result == null) {
+                        context.getString(R.string.debug_menu_autofill_already)
+                    } else {
+                        context.getString(R.string.debug_menu_autofill_done, result.first, result.second)
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 },
                 onDismiss = { showTestMenu = false }
             )
@@ -165,13 +178,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            DelayedEntrance(isVisible = isContentVisible, order = 2) {
-                Text(
-                    text = stringResource(R.string.login_footer),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
         }
     }
 }
@@ -212,12 +218,6 @@ private fun LoginHeader(onLogoClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            text = stringResource(R.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
     }
 }
 
@@ -243,6 +243,7 @@ private fun TestUsersDialog(
     users: List<User>,
     error: String?,
     onUserSelected: (User) -> Unit,
+    onAutofill: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -257,7 +258,7 @@ private fun TestUsersDialog(
         },
         title = { Text(text = stringResource(R.string.debug_menu_title)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 if (users.isEmpty()) {
                     Text(
                         text = error ?: "No se cargo ningun usuario (users.json vacio o no encontrado)",
@@ -271,7 +272,7 @@ private fun TestUsersDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = user.role.name,
+                            text = "#${user.idUser} | ${user.role} | ${user.name}",
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.titleSmall
                         )
@@ -282,6 +283,11 @@ private fun TestUsersDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(text = stringResource(R.string.debug_menu_close))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onAutofill) {
+                Text(text = stringResource(R.string.debug_menu_autofill))
             }
         }
     )

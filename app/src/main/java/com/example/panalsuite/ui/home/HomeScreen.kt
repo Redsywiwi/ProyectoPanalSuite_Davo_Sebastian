@@ -53,13 +53,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.R
+import com.example.panalsuite.model.Permissions
 import com.example.panalsuite.model.Role
 import com.example.panalsuite.model.Ticket
 import com.example.panalsuite.model.TicketFilters
 import com.example.panalsuite.model.User
 import com.example.panalsuite.repository.Session
 import com.example.panalsuite.repository.TicketRepository
+import com.example.panalsuite.ui.admin.AdminScreen
 import com.example.panalsuite.ui.components.TicketCard
+import com.example.panalsuite.ui.management.ManagementDashboardScreen
+import com.example.panalsuite.ui.management.ManagementSummaryScreen
+import com.example.panalsuite.ui.teams.TeamsScreen
 import com.example.panalsuite.ui.theme.PanalSuiteTheme
 import kotlinx.coroutines.launch
 
@@ -123,20 +128,37 @@ fun HomeScreen(
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 when (tabs[selectedIndex].type) {
-                    TabType.HOME -> HomeContent(
-                        user = user,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onNewTicketClick = onNewTicketClick,
-                        onTicketClick = onTicketClick,
-                        filters = filters,
-                        onFiltersChange = { filters = it }
-                    )
+                    TabType.HOME -> when (user.role) {
+                        Role.Supervisor -> SupervisorHomeContent(
+                            user = user,
+                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onTicketClick = onTicketClick,
+                            filters = filters,
+                            onFiltersChange = { filters = it }
+                        )
+
+                        Role.Management -> ManagementDashboardScreen(
+                            user = user,
+                            onMenuClick = { scope.launch { drawerState.open() } }
+                        )
+                        else -> HomeContent(
+                            user = user,
+                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onNewTicketClick = onNewTicketClick,
+                            onTicketClick = onTicketClick,
+                            filters = filters,
+                            onFiltersChange = { filters = it }
+                        )
+                    }
                     TabType.TICKETS -> TicketsContent(
                         user = user,
                         filters = filters,
                         onFiltersChange = { filters = it },
                         onTicketClick = onTicketClick
                     )
+                    TabType.TEAM -> TeamsScreen(user = user)
+                    TabType.SUMMARY -> ManagementSummaryScreen(user = user)
+                    TabType.ADMIN -> AdminScreen(user = user)
                     TabType.OTHER -> PlaceholderContent(tabs[selectedIndex])
                     TabType.PROFILE -> ProfileContent(user, onLogoutClick)
                 }
@@ -144,10 +166,6 @@ fun HomeScreen(
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// HOME
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun HomeContent(
@@ -159,8 +177,8 @@ private fun HomeContent(
     onFiltersChange: (TicketFilters) -> Unit
 ) {
     val isCommonUser = user.role == Role.CommonUser
-    // Mientras hay busqueda/filtros activos se muestran los resultados en vez de "Recent"
-    val searching = isCommonUser && filters.isActive
+    val canSeeAll = Permissions.ViewSystemTray in user.role.permits
+    val searching = (isCommonUser || canSeeAll) && filters.isActive
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -177,28 +195,36 @@ private fun HomeContent(
         ) {
             HomeHeader(name = user.name, role = user.role.name, onMenuClick = onMenuClick)
             TicketSearchBar(filters = filters, onFiltersChange = onFiltersChange)
-            if (!searching) {
+            if (!searching && !canSeeAll) {
                 PinnedTicketsCard(userId = user.idUser, onTicketClick = onTicketClick)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SectionTitle(
                     title = stringResource(
-                        if (searching) R.string.home_search_results else R.string.home_recent_tickets
+                        when {
+                            searching -> R.string.home_search_results
+                            canSeeAll -> R.string.home_all_tickets
+                            else -> R.string.home_recent_tickets
+                        }
                     ),
-                    action = if (searching) null else stringResource(R.string.home_see_all)
+                    action = if (searching || canSeeAll) null else stringResource(R.string.home_see_all)
                 )
-                if (isCommonUser) {
-                    // Siempre filtrado por el idUser de la sesion
-                    val shown = if (searching) {
-                        TicketRepository.searchTicketsByUser(user.idUser, filters)
-                    } else {
-                        TicketRepository.getTicketsByUser(user.idUser).take(3)
+                if (isCommonUser || canSeeAll) {
+                    val shown = when {
+                        canSeeAll && searching -> TicketRepository.searchAllTickets(user, filters)
+                        canSeeAll -> TicketRepository.getAllTickets(user)
+                        searching -> TicketRepository.searchTicketsByUser(user.idUser, filters)
+                        else -> TicketRepository.getTicketsByUser(user.idUser).take(3)
                     }
                     if (shown.isEmpty()) {
                         EmptyStateText(
                             text = stringResource(
-                                if (searching) R.string.tickets_no_results else R.string.tickets_empty
+                                when {
+                                    searching -> R.string.tickets_no_results
+                                    canSeeAll -> R.string.tickets_empty_all
+                                    else -> R.string.tickets_empty
+                                }
                             )
                         )
                     } else {
@@ -224,7 +250,7 @@ private fun HomeContent(
 }
 
 @Composable
-private fun HomeHeader(name: String, role: String, onMenuClick: () -> Unit) {
+internal fun HomeHeader(name: String, role: String, onMenuClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -340,7 +366,7 @@ private fun PinnedTicketRow(ticket: Ticket, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EmptyStateText(text: String) {
+internal fun EmptyStateText(text: String) {
     Text(
         text = text,
         modifier = Modifier.fillMaxWidth(),
@@ -380,7 +406,7 @@ private fun PermissionsCard(role: Role) {
 }
 
 @Composable
-private fun SectionTitle(title: String, action: String? = null) {
+internal fun SectionTitle(title: String, action: String? = null) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -401,10 +427,6 @@ private fun SectionTitle(title: String, action: String? = null) {
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// MY TICKETS (CommonUser) / ASSIGNED (Operator)
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun TicketsContent(
@@ -436,14 +458,23 @@ private fun TicketsContent(
                 }
             }
         } else {
-            TicketCard()
+            TicketSearchBar(filters = filters, onFiltersChange = onFiltersChange)
+
+            val assignedTickets = TicketRepository.searchTicketsAssignedTo(user.idUser, filters)
+            if (assignedTickets.isEmpty()) {
+                EmptyStateText(
+                    text = stringResource(
+                        if (filters.isActive) R.string.tickets_no_results else R.string.tickets_assigned_empty
+                    )
+                )
+            } else {
+                assignedTickets.forEach { ticket ->
+                    TicketCard(ticket = ticket, onClick = { onTicketClick(ticket.idTicket) })
+                }
+            }
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// TEAM / SUMMARY / MANAGE (por construir)
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun PlaceholderContent(tab: BottomTab) {
@@ -482,10 +513,6 @@ private fun PlaceholderContent(tab: BottomTab) {
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// PROFILE
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun ProfileContent(user: User, onLogoutClick: () -> Unit) {
