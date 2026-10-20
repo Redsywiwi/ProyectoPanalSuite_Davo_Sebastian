@@ -9,9 +9,9 @@ data class Ticket (
     val description : String,
     val category: String,
     val type: String,
-    var priority: String,// siento q string no es lo mejor que se pueda usar
-    val impact: String, // lo mismo digo con esto
-    var status: String,  // y esto
+    var priority: Urgency,// siento que string no es lo mejor que se pueda usar || edit: No lo era
+    val impact: String,
+    var status: TicketStatus,  // y esto
     val createdAt: LocalDateTime,
     var lastUpdate: LocalDateTime,
     val branch : String, //no estoy seguro si la sucursal puede cambiar asi que la dejo que no por default
