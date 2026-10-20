@@ -75,6 +75,10 @@ object TicketRepository {
     fun searchAllTickets(viewer: User, filters: TicketFilters): List<Ticket> =
         if (canViewAll(viewer)) applyFilters(tickets, filters) else emptyList()
 
+    // Tickets cuyo responsable (peopleInCharge) es el operator indicado, con busqueda y filtros.
+    fun searchTicketsAssignedTo(idOperator: Long, filters: TicketFilters): List<Ticket> =
+        applyFilters(tickets.filter { it.peopleInCharge == idOperator }, filters)
+
     private fun applyFilters(source: List<Ticket>, filters: TicketFilters): List<Ticket> {
         val text = filters.query.trim()
         val a = filters.fromDate
@@ -141,7 +145,12 @@ object TicketRepository {
     }
 
     @Synchronized
-    fun assignTicket(idTicket: Long, target: User, actor: User): Boolean {
+    fun assignTicket(
+        idTicket: Long,
+        target: User,
+        actor: User,
+        previousAssigneeName: String? = null
+    ): Boolean {
         if (Permissions.Reassign !in actor.role.permits) return false
         if (target.role != Role.Operator || !target.active) return false
         val index = tickets.indexOfFirst { it.idTicket == idTicket }
@@ -153,8 +162,8 @@ object TicketRepository {
         val entry = DevelopmentHistory(
             idDevelopment = nextDevelopmentId++,
             modifiedField = "Assigned to",
-            previousValue = ticket.peopleInCharge?.let { "Operator #$it" } ?: "Unassigned",
-            newValue = "${target.name} ${target.lastName} (Operator #${target.idUser})",
+            previousValue = ticket.peopleInCharge?.let { previousAssigneeName ?: "Operator #$it" } ?: "Unassigned",
+            newValue = "${target.name} ${target.lastName}",
             idUser = actor.idUser,
             date = now
         )
@@ -165,6 +174,29 @@ object TicketRepository {
         )
         return true
     }
+    // Deja sin asignar los tickets de un operator (cuando se borra, se desactiva o cambia de rol)
+    @Synchronized
+    fun releaseTicketsOf(idOperator: Long, operatorName: String, actor: User) {
+        val now = LocalDateTime.now()
+        for (index in tickets.indices) {
+            val ticket = tickets[index]
+            if (ticket.peopleInCharge != idOperator) continue
+            val entry = DevelopmentHistory(
+                idDevelopment = nextDevelopmentId++,
+                modifiedField = "Assigned to",
+                previousValue = operatorName,
+                newValue = "Unassigned",
+                idUser = actor.idUser,
+                date = now
+            )
+            tickets[index] = ticket.copy(
+                peopleInCharge = null,
+                lastUpdate = now,
+                developmentHistory = (ticket.developmentHistory + entry).toMutableList()
+            )
+        }
+    }
+
     @Synchronized
     fun addComment(idTicket: Long, author: User, text: String): Boolean {
         if (Permissions.Comment !in author.role.permits) return false

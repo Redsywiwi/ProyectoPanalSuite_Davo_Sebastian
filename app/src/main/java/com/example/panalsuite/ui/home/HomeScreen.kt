@@ -60,6 +60,7 @@ import com.example.panalsuite.model.TicketFilters
 import com.example.panalsuite.model.User
 import com.example.panalsuite.repository.Session
 import com.example.panalsuite.repository.TicketRepository
+import com.example.panalsuite.ui.admin.AdminScreen
 import com.example.panalsuite.ui.components.TicketCard
 import com.example.panalsuite.ui.management.ManagementDashboardScreen
 import com.example.panalsuite.ui.management.ManagementSummaryScreen
@@ -157,6 +158,7 @@ fun HomeScreen(
                     )
                     TabType.TEAM -> TeamsScreen(user = user)
                     TabType.SUMMARY -> ManagementSummaryScreen(user = user)
+                    TabType.ADMIN -> AdminScreen(user = user)
                     TabType.OTHER -> PlaceholderContent(tabs[selectedIndex])
                     TabType.PROFILE -> ProfileContent(user, onLogoutClick)
                 }
@@ -164,10 +166,6 @@ fun HomeScreen(
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// HOME
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun HomeContent(
@@ -430,10 +428,6 @@ internal fun SectionTitle(title: String, action: String? = null) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// MY TICKETS (CommonUser) / ASSIGNED (Operator)
-// ---------------------------------------------------------------------------
-
 @Composable
 private fun TicketsContent(
     user: User,
@@ -464,14 +458,23 @@ private fun TicketsContent(
                 }
             }
         } else {
-            TicketCard()
+            TicketSearchBar(filters = filters, onFiltersChange = onFiltersChange)
+
+            val assignedTickets = TicketRepository.searchTicketsAssignedTo(user.idUser, filters)
+            if (assignedTickets.isEmpty()) {
+                EmptyStateText(
+                    text = stringResource(
+                        if (filters.isActive) R.string.tickets_no_results else R.string.tickets_assigned_empty
+                    )
+                )
+            } else {
+                assignedTickets.forEach { ticket ->
+                    TicketCard(ticket = ticket, onClick = { onTicketClick(ticket.idTicket) })
+                }
+            }
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// TEAM / SUMMARY / MANAGE (por construir)
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun PlaceholderContent(tab: BottomTab) {
@@ -510,10 +513,6 @@ private fun PlaceholderContent(tab: BottomTab) {
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// PROFILE
-// ---------------------------------------------------------------------------
 
 @Composable
 private fun ProfileContent(user: User, onLogoutClick: () -> Unit) {

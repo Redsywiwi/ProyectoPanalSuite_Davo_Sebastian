@@ -68,7 +68,6 @@ fun TicketDetailsScreen(
     onBackClick: () -> Unit
 ) {
     val user = Session.currentUser ?: return
-    // El dueño ve su ticket; un rol con ViewSystemTray (Operator) puede ver cualquiera
     val ticket = TicketRepository.getTicketForViewer(ticketId, user)
 
     Scaffold(
@@ -90,7 +89,6 @@ fun TicketDetailsScreen(
                     }
                 },
                 actions = {
-                    // Pin es una marca del ticket, solo tiene sentido para su dueño
                     if (ticket != null && ticket.idUser == user.idUser) {
                         IconButton(
                             onClick = { TicketRepository.setPinned(ticket.idTicket, !ticket.pinned) }
@@ -136,7 +134,6 @@ fun TicketDetailsScreen(
 @Composable
 private fun TicketDetailsContent(ticket: Ticket, user: User, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    // id -> nombre, para mostrar quien comento / cambio el estado
     val usersById = remember { UserRepository(context).getUsers().associateBy { it.idUser } }
     val userLabel: (Long) -> String = { id ->
         usersById[id]?.let { "${it.name} ${it.lastName}" }
@@ -183,7 +180,7 @@ private fun TicketDetailsContent(ticket: Ticket, user: User, modifier: Modifier 
             DetailDivider()
             DetailRow(stringResource(R.string.new_ticket_field_priority), ticket.priority.priorityName)
             DetailDivider()
-            DetailRow(stringResource(R.string.new_ticket_field_location), ticket.branch.Locations)
+            DetailRow(stringResource(R.string.new_ticket_field_location), ticket.branch.name)
             DetailDivider()
             DetailRow(
                 stringResource(R.string.ticket_assigned_label),
@@ -209,7 +206,6 @@ private fun TicketDetailsContent(ticket: Ticket, user: User, modifier: Modifier 
             )
         }
 
-        // Accion: cambiar estado ChangeStatus
         if (canChangeStatus) {
             SectionCard {
                 Text(
@@ -273,7 +269,6 @@ private fun TicketDetailsContent(ticket: Ticket, user: User, modifier: Modifier 
             }
         }
 
-        // Historial de cambios (mas reciente primero)
         if (ticket.developmentHistory.isNotEmpty()) {
             SectionCard {
                 Text(
@@ -306,7 +301,12 @@ private fun TicketDetailsContent(ticket: Ticket, user: User, modifier: Modifier 
             currentAssigneeId = ticket.peopleInCharge,
             operators = operators,
             onAssign = { operator ->
-                TicketRepository.assignTicket(ticket.idTicket, operator, user)
+                TicketRepository.assignTicket(
+                    idTicket = ticket.idTicket,
+                    target = operator,
+                    actor = user,
+                    previousAssigneeName = ticket.peopleInCharge?.let(userLabel)
+                )
                 showAssignDialog = false
             },
             onDismiss = { showAssignDialog = false }

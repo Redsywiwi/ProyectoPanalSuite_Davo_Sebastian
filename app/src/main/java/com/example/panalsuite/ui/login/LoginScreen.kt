@@ -80,7 +80,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.decode.ImageDecoderDecoder // Para API 28+
+import coil.decode.ImageDecoderDecoder
 import android.os.Build
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
@@ -244,7 +244,7 @@ private fun TestUsersDialog(
         },
         title = { Text(text = stringResource(R.string.debug_menu_title)) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 if (users.isEmpty()) {
                     Text(
                         text = error ?: "No se cargo ningun usuario (users.json vacio o no encontrado)",
@@ -258,7 +258,7 @@ private fun TestUsersDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "${user.role} | ${user.name}",
+                            text = "#${user.idUser} | ${user.role} | ${user.name}",
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.titleSmall
                         )
@@ -354,9 +354,8 @@ private fun LoginCard(
                 onToggleVisibility = onTogglePasswordVisibility,
                 onDone = onLoginClick
             )
-            // ===============================================================================
             // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
-            // ===============================================================================
+
 
             // asumiria que si pero ni idea como implementarlo ahora
 

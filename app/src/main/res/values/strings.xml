@@ -1,7 +1,7 @@
 <resources>
     <!-- LOGIN -->
     <string name="app_name">PanalSuite</string>
-    <string name="login_email_label">Email</string>
+    <string name="login_email_label">Email or ID</string>
     <string name="login_password_label">Password</string>
     <string name="login_show_password">Show password</string>
     <string name="login_hide_password">Hide password</string>
@@ -42,6 +42,7 @@
     <string name="home_pinned_tickets">Pinned Tickets</string>
     <string name="home_pinned_empty">You have no pinned tickets yet. Pin one from its details screen.</string>
     <string name="tickets_empty">You have not created any tickets yet.</string>
+    <string name="tickets_assigned_empty">You have no tickets assigned to you.</string>
     <string name="back">Back</string>
 
 
@@ -164,6 +165,59 @@
     <string name="summary_teams">Teams</string>
     <string name="summary_share">%1$d · %2$s</string>
     <string name="summary_operator_detail">%1$d open · %2$d closed · %3$s compliance</string>
+
+    <!-- Admin -->
+    <string name="admin_title">Administration</string>
+    <string name="admin_memory_note">Changes apply immediately and are kept until the app is closed.</string>
+    <string name="admin_section_users">Users</string>
+    <string name="admin_section_permissions">Permissions</string>
+    <string name="admin_section_parameters">Parameters</string>
+    <string name="admin_edit">Edit</string>
+    <string name="admin_delete">Delete</string>
+    <string name="admin_save">Save</string>
+    <string name="admin_create">Create</string>
+    <string name="admin_users_count">%1$d users</string>
+    <string name="admin_users_new">New user</string>
+    <string name="admin_users_empty">There are no users.</string>
+    <string name="admin_user_id_email">ID #%1$d · %2$s</string>
+    <string name="admin_user_inactive">Inactive</string>
+    <string name="admin_user_create_title">New user</string>
+    <string name="admin_user_edit_title">Edit user</string>
+    <string name="admin_user_next_id">It will be created with ID #%1$d</string>
+    <string name="admin_user_id">ID #%1$d</string>
+    <string name="admin_field_name">Name</string>
+    <string name="admin_field_lastname">Last name</string>
+    <string name="admin_field_email">Email</string>
+    <string name="admin_field_email_hint">Optional. If empty, one is generated. The user can log in with the email or the ID.</string>
+    <string name="admin_field_password">Password</string>
+    <string name="admin_field_role">Role</string>
+    <string name="admin_field_active">Active</string>
+    <string name="admin_self_hint">This is your own account: you cannot change your role or deactivate it.</string>
+    <string name="admin_delete_user_title">Delete user?</string>
+    <string name="admin_delete_user_message">%1$s will be deleted and their assigned tickets will be left unassigned. This cannot be undone.</string>
+    <string name="admin_perm_title">Permissions for %1$s</string>
+    <string name="admin_perm_customized">Customized</string>
+    <string name="admin_perm_default">Default</string>
+    <string name="admin_perm_reset">Reset to default</string>
+    <string name="admin_perm_locked">Required for the Administrator role</string>
+    <string name="admin_param_categories">Ticket categories</string>
+    <string name="admin_param_locations">Branches</string>
+    <string name="admin_param_add">Add</string>
+    <string name="admin_param_new_category">New category</string>
+    <string name="admin_param_edit_category">Edit category</string>
+    <string name="admin_param_new_location">New branch</string>
+    <string name="admin_param_edit_location">Edit branch</string>
+    <string name="admin_param_delete_title">Delete?</string>
+    <string name="admin_param_delete_message">“%1$s” will be removed from the lists. Existing tickets keep their value.</string>
+    <string name="admin_err_not_allowed">You do not have permission to do that.</string>
+    <string name="admin_err_missing">Name, last name and password are required.</string>
+    <string name="admin_err_email_taken">That email is already in use.</string>
+    <string name="admin_err_not_found">That item no longer exists.</string>
+    <string name="admin_err_self">You cannot change your own role, or deactivate or delete yourself.</string>
+    <string name="admin_err_last_admin">There must be at least one active Administrator.</string>
+    <string name="admin_err_param_empty">The name cannot be empty.</string>
+    <string name="admin_err_param_duplicate">That name already exists.</string>
+    <string name="admin_err_last_one">At least one must remain.</string>
 
     <!-- Profile -->
     <string name="profile_role">Role: %1$s</string>
