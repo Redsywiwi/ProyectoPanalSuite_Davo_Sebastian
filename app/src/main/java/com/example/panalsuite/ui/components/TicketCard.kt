@@ -43,7 +43,8 @@ fun TicketCard(
         title = ticket.title,
         description = ticket.description,
         priority = ticket.priority.priorityName,
-        assignedName = ticket.peopleInCharge?.let {
+        assignedName = ticket.peopleInCharge?.let {//Me gustaria que salierea el nombre del operador
+            // pero como es un long no se como hacerlo wuaaa
             stringResource(R.string.ticket_assigned_format, it)
         } ?: stringResource(R.string.ticket_unassigned),
         lastUpdate = stringResource(

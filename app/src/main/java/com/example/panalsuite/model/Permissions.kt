@@ -11,7 +11,9 @@ enum class Permissions {
     SeeWorkload,
     Reassign,
     ViewSummary,
-    ManageUsers
+    ManageUsers,
+    ManageTeams,
+    ViewDashboard
 }
 
 enum class Role(val permits: Set<Permissions>){
@@ -24,12 +26,12 @@ enum class Role(val permits: Set<Permissions>){
         )
     ),
     Supervisor(
-      Operator.permits + setOf(
-          Permissions.SeeWorkload, Permissions.Reassign
-      )
+        Operator.permits + setOf(
+            Permissions.SeeWorkload, Permissions.Reassign, Permissions.ManageTeams
+        )
     ),
     Management(
-        setOf(Permissions.ViewTickets , Permissions.ViewSummary, Permissions.ViewHistory)
+        setOf(Permissions.ViewDashboard, Permissions.ViewSummary)
     ),
     Administrator(
         setOf(Permissions.ManageUsers)

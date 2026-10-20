@@ -165,13 +165,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            DelayedEntrance(isVisible = isContentVisible, order = 2) {
-                Text(
-                    text = stringResource(R.string.login_footer),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
         }
     }
 }
@@ -212,12 +205,6 @@ private fun LoginHeader(onLogoClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            text = stringResource(R.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
     }
 }
 
@@ -271,7 +258,7 @@ private fun TestUsersDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = user.role.name,
+                            text = "${user.role} | ${user.name}",
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.titleSmall
                         )

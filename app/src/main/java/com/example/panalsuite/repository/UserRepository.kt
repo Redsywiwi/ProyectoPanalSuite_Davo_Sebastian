@@ -53,7 +53,8 @@ class UserRepository(private val context: Context) {
         return users
     }
 
-    // Devuelve el usuario si las credenciales son válidas, o null si no
+    fun getActiveOperators(): List<User> =
+        getUsers().filter { it.role == Role.Operator && it.active }
     fun authenticate(email: String, password: String): User? =
         getUsers().firstOrNull {
             it.email.equals(email.trim(), ignoreCase = true) &&

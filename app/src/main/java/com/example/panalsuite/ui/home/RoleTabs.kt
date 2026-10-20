@@ -14,7 +14,7 @@ import com.example.panalsuite.R
 import com.example.panalsuite.model.Role
 
 // Que contenido muestra cada tab
-enum class TabType { HOME, TICKETS, OTHER, PROFILE }
+enum class TabType { HOME, TICKETS, TEAM, SUMMARY, OTHER, PROFILE }
 
 data class BottomTab(
     @StringRes
@@ -40,12 +40,12 @@ fun Role.bottomTabs(): List<BottomTab> = when (this) {
     )
     Role.Supervisor -> listOf(
         HomeTab,
-        BottomTab(R.string.tab_team, Icons.Rounded.Groups, TabType.OTHER),
+        BottomTab(R.string.tab_team, Icons.Rounded.Groups, TabType.TEAM),
         ProfileTab
     )
     Role.Management -> listOf(
         HomeTab,
-        BottomTab(R.string.tab_summary, Icons.Rounded.BarChart, TabType.OTHER),
+        BottomTab(R.string.tab_summary, Icons.Rounded.BarChart, TabType.SUMMARY),
         ProfileTab
     )
     Role.Administrator -> listOf(

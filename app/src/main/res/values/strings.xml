@@ -1,14 +1,12 @@
 <resources>
     <!-- LOGIN -->
     <string name="app_name">PanalSuite</string>
-    <string name="login_subtitle">Login subtitle</string>
     <string name="login_email_label">Email</string>
     <string name="login_password_label">Password</string>
     <string name="login_show_password">Show password</string>
     <string name="login_hide_password">Hide password</string>
     <string name="login_forgot_password">Forgot password?</string>
     <string name="login_button">Login</string>
-    <string name="login_footer">Login footer</string>
     <string name="home_title">Homescreen</string>
     <string name="home_placeholder">WIP :3c</string>
     <string name="home_logout">Logout</string>
@@ -95,6 +93,77 @@
     <string name="ticket_last_update_label">Last update</string>
     <string name="ticket_pin">Pin ticket</string>
     <string name="ticket_unpin">Unpin ticket</string>
+
+    <!-- Operator: bandeja y acciones del ticket -->
+    <string name="home_all_tickets">All tickets</string>
+    <string name="tickets_empty_all">There are no tickets yet.</string>
+    <string name="ticket_change_status">Change status</string>
+    <string name="ticket_status_label">Status</string>
+    <string name="ticket_comments_title">Comments (%1$d)</string>
+    <string name="ticket_comments_empty">No comments yet.</string>
+    <string name="ticket_comment_hint">Write a comment</string>
+    <string name="ticket_comment_send">Add comment</string>
+    <string name="ticket_history_title">History</string>
+
+    <!-- Supervisor: asignacion de tickets a operators -->
+    <string name="ticket_assign_action">Assign</string>
+    <string name="ticket_assign_section">Assign to operator</string>
+    <string name="assign_title">Assign to operator</string>
+    <string name="assign_no_operators">There are no active operators to assign.</string>
+
+    <!-- Team (Supervisor) -->
+    <string name="teams_title">Teams</string>
+    <string name="teams_new">New team</string>
+    <string name="teams_empty">There are no teams yet. Create one to group operators.</string>
+    <string name="teams_create_title">New team</string>
+    <string name="teams_edit_title">Edit team</string>
+    <string name="teams_field_name">Team name</string>
+    <string name="teams_field_members">Operators</string>
+    <string name="teams_name_taken">A team with this name already exists.</string>
+    <string name="teams_no_operators">There are no active operators.</string>
+    <string name="teams_member_count">%1$d members</string>
+    <string name="teams_members_empty">No operators assigned.</string>
+    <string name="teams_save">Save</string>
+    <string name="teams_edit">Edit</string>
+    <string name="teams_delete">Delete</string>
+    <string name="teams_delete_title">Delete team?</string>
+    <string name="teams_delete_message">Delete %1$s? Its operators will not be affected.</string>
+    <string name="teams_delete_confirm">Delete</string>
+
+    <!-- Management: dashboard y summary -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="report_no_access">You do not have access to these reports.</string>
+    <string name="report_none">No data yet.</string>
+    <string name="report_uncategorized">Uncategorized</string>
+    <string name="kpi_total">Total tickets</string>
+    <string name="kpi_open">Open</string>
+    <string name="kpi_closed">Closed</string>
+    <string name="kpi_critical">Critical open</string>
+    <string name="kpi_unassigned">Open unassigned</string>
+    <string name="kpi_last7">Created last 7 days</string>
+    <string name="report_compliance_title">Compliance</string>
+    <string name="report_compliance_detail">%1$d of %2$d tickets closed</string>
+    <string name="report_workload_title">Workload by operator</string>
+    <string name="report_team_title">Workload by team</string>
+    <string name="report_workload_value">%1$d open · %2$d closed</string>
+    <string name="report_age_days">%1$.1f days</string>
+    <string name="report_age_days_long">%1$d days</string>
+    <string name="summary_title">Summary</string>
+    <string name="summary_general">General</string>
+    <string name="summary_total">Total</string>
+    <string name="summary_assigned">Assigned</string>
+    <string name="summary_compliance">Compliance</string>
+    <string name="summary_assignment_rate">Assignment rate</string>
+    <string name="summary_avg_age">Average open age</string>
+    <string name="summary_oldest_age">Oldest open ticket</string>
+    <string name="summary_by_status">By status</string>
+    <string name="summary_by_priority">By priority</string>
+    <string name="summary_by_branch">By branch</string>
+    <string name="summary_by_category">By category</string>
+    <string name="summary_operators">Operators</string>
+    <string name="summary_teams">Teams</string>
+    <string name="summary_share">%1$d · %2$s</string>
+    <string name="summary_operator_detail">%1$d open · %2$d closed · %3$s compliance</string>
 
     <!-- Profile -->
     <string name="profile_role">Role: %1$s</string>
