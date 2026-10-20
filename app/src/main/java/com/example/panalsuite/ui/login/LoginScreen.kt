@@ -80,8 +80,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.decode.ImageDecoderDecoder
+import coil.decode.ImageDecoderDecoder // Para API 28+
 import android.os.Build
+import android.widget.Toast
+import com.example.panalsuite.repository.DemoData
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import android.media.MediaPlayer
@@ -108,6 +110,8 @@ fun LoginScreen(
     var showTestMenu by rememberSaveable { mutableStateOf(false) }
     var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) { isContentVisible = true }
 
     Box(
@@ -125,6 +129,15 @@ fun LoginScreen(
                     email = user.email
                     password = user.password
                     showTestMenu = false
+                },
+                onAutofill = {
+                    val result = DemoData.load()
+                    val message = if (result == null) {
+                        context.getString(R.string.debug_menu_autofill_already)
+                    } else {
+                        context.getString(R.string.debug_menu_autofill_done, result.first, result.second)
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 },
                 onDismiss = { showTestMenu = false }
             )
@@ -230,6 +243,7 @@ private fun TestUsersDialog(
     users: List<User>,
     error: String?,
     onUserSelected: (User) -> Unit,
+    onAutofill: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -269,6 +283,11 @@ private fun TestUsersDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(text = stringResource(R.string.debug_menu_close))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onAutofill) {
+                Text(text = stringResource(R.string.debug_menu_autofill))
             }
         }
     )
@@ -354,8 +373,9 @@ private fun LoginCard(
                 onToggleVisibility = onTogglePasswordVisibility,
                 onDone = onLoginClick
             )
+            // ===============================================================================
             // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
-
+            // ===============================================================================
 
             // asumiria que si pero ni idea como implementarlo ahora
 

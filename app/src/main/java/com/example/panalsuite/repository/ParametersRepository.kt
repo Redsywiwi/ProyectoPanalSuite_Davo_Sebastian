@@ -6,10 +6,9 @@ import com.example.panalsuite.model.Permissions
 import com.example.panalsuite.model.User
 
 enum class ParamError { NotAllowed, Empty, Duplicate, NotFound, LastOne }
-
 object ParametersRepository {
     private val categories = mutableStateListOf(
-        "Hardware", "Software", "Network", "Access", "Secutity", "Other"
+        "Hardware", "Software", "Network", "Access", "Security", "Other"
     )
 
     private val locations = mutableStateListOf(
@@ -30,6 +29,7 @@ object ParametersRepository {
     fun getLocations(): List<Location> = locations.toList()
 
     private fun canManage(actor: User) = Permissions.ManageParameters in actor.role.permits
+
 
     @Synchronized
     fun addCategory(actor: User, name: String): ParamError? {

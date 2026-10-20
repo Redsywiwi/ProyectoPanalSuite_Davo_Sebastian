@@ -10,8 +10,11 @@
     <string name="home_title">Homescreen</string>
     <string name="home_placeholder">WIP :3c</string>
     <string name="home_logout">Logout</string>
-    <string name="debug_menu_title">Test users</string>
+    <string name="debug_menu_title">Debug menu</string>
     <string name="debug_menu_close">Close</string>
+    <string name="debug_menu_autofill">Autofill</string>
+    <string name="debug_menu_autofill_done">Created %1$d tickets and %2$d teams</string>
+    <string name="debug_menu_autofill_already">Demo data was already loaded</string>
 
 
     <!-- Menus -->

@@ -5,7 +5,6 @@ import com.example.panalsuite.model.Permissions
 import com.example.panalsuite.model.Team
 import com.example.panalsuite.model.User
 
-// viven en memoria mientras la app esta abierta
 object TeamRepository {
     private val teams = mutableStateListOf<Team>()
     private var nextTeamId = 1L
@@ -14,7 +13,6 @@ object TeamRepository {
 
     fun getTeam(idTeam: Long): Team? = teams.firstOrNull { it.idTeam == idTeam }
 
-    // Crea un equipo. Requiere ManageTeams.
     @Synchronized
     fun createTeam(actor: User, name: String, memberIds: List<Long>): Team? {
         if (Permissions.ManageTeams !in actor.role.permits) return null
@@ -29,7 +27,18 @@ object TeamRepository {
         return team
     }
 
-    // Edita nombre y miembros de un equipo. Requiere ManageTeams.
+    @Synchronized
+    fun importTeam(name: String, memberIds: List<Long>): Team? {
+        val clean = name.trim()
+        if (clean.isEmpty() || isNameTaken(clean, exceptId = null)) return null
+        val team = Team(
+            idTeam = nextTeamId++,
+            name = clean,
+            memberIds = memberIds.distinct()
+        )
+        teams.add(team)
+        return team
+    }
     @Synchronized
     fun updateTeam(actor: User, idTeam: Long, name: String, memberIds: List<Long>): Boolean {
         if (Permissions.ManageTeams !in actor.role.permits) return false
@@ -41,7 +50,6 @@ object TeamRepository {
         return true
     }
 
-    // Elimina un equipo. Requiere ManageTeams.
     @Synchronized
     fun deleteTeam(actor: User, idTeam: Long): Boolean {
         if (Permissions.ManageTeams !in actor.role.permits) return false

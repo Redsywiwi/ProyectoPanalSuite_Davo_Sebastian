@@ -149,7 +149,7 @@ object TicketRepository {
         idTicket: Long,
         target: User,
         actor: User,
-        previousAssigneeName: String? = null
+        previousAssigneeName: String? = null // nombre del responsable anterior, para el historial
     ): Boolean {
         if (Permissions.Reassign !in actor.role.permits) return false
         if (target.role != Role.Operator || !target.active) return false
@@ -195,6 +195,53 @@ object TicketRepository {
                 developmentHistory = (ticket.developmentHistory + entry).toMutableList()
             )
         }
+    }
+
+    @Synchronized
+    fun importTicket(
+        idUser: Long,
+        title: String,
+        category: String,
+        priority: Urgency,
+        branch: Location,
+        description: String,
+        status: TicketStatus,
+        createdAt: LocalDateTime,
+        lastUpdate: LocalDateTime,
+        peopleInCharge: Long?,
+        comments: List<Triple<Long, String, LocalDateTime>>
+    ): Ticket {
+        val id = nextTicketId++
+        val ticket = Ticket(
+            idTicket = id,
+            idUser = idUser,
+            title = title.trim(),
+            description = description.trim(),
+            category = category.trim(),
+            type = "",
+            priority = priority,
+            impact = "",
+            status = status,
+            createdAt = createdAt,
+            lastUpdate = lastUpdate,
+            branch = branch,
+            team = null,
+            peopleInCharge = peopleInCharge,
+            commentary = comments.map { (author, text, date) ->
+                Commentary(
+                    idCommentary = nextCommentaryId++,
+                    idTicket = id,
+                    idUser = author,
+                    text = text.trim(),
+                    commentaryDate = date
+                )
+            }.toMutableList(),
+            developmentHistory = mutableListOf(),
+            evidences = mutableListOf(),
+            pinned = false
+        )
+        tickets.add(ticket)
+        return ticket
     }
 
     @Synchronized
