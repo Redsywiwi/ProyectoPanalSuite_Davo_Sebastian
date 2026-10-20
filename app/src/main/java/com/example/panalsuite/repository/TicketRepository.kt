@@ -17,13 +17,23 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 
-//Los tickets creados se borran si cuando cierras la app upsi
+//Los tickets creados YA NO se borran si cuando cierras la app upsi
 
 object TicketRepository {
     private val tickets = mutableStateListOf<Ticket>()
     private var nextTicketId = 1L
     private var nextCommentaryId = 1L
     private var nextDevelopmentId = 1L
+
+    fun snapshot(): List<Ticket> = tickets.toList()
+    @Synchronized
+    fun restore(saved: List<Ticket>) {
+        tickets.clear()
+        tickets.addAll(saved)
+        nextTicketId = (saved.maxOfOrNull { it.idTicket } ?: 0L) + 1
+        nextCommentaryId = (saved.flatMap { it.commentary }.maxOfOrNull { it.idCommentary } ?: 0L) + 1
+        nextDevelopmentId = (saved.flatMap { it.developmentHistory }.maxOfOrNull { it.idDevelopment } ?: 0L) + 1
+    }
 
     @Synchronized
     fun createTicket(

@@ -7,7 +7,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 object DemoData {
-    private var loaded = false
+    var loaded = false
 
     private class DemoTicket(
         val title: String,
@@ -220,6 +220,7 @@ object DemoData {
     fun load(): Pair<Int, Int>? {
         if (loaded) return null
         loaded = true
+        Persistence.saveDemoLoaded(true)
 
         demoTickets.forEachIndexed { index, demo ->
             val span = Duration.between(demo.createdAt, demo.lastUpdate)

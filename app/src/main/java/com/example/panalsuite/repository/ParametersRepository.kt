@@ -25,6 +25,13 @@ object ParametersRepository {
     )
     private var nextLocationId = 11L
 
+    @Synchronized
+    fun restore(savedCategories: List<String>, savedLocations: List<Location>) {
+        if (savedCategories.isNotEmpty()) { categories.clear(); categories.addAll(savedCategories) }
+        if (savedLocations.isNotEmpty()) { locations.clear(); locations.addAll(savedLocations) }
+        nextLocationId = (locations.maxOfOrNull { it.idLocation } ?: 0L) + 1
+    }
+
     fun getCategories(): List<String> = categories.toList()
     fun getLocations(): List<Location> = locations.toList()
 

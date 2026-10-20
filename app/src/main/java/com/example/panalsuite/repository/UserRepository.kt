@@ -13,20 +13,16 @@ enum class UserError {
 }
 
 // Los usuarios de prueba se cargan de assets/users.json la primera vez.
-// Despues viven en memoria mientras la app esta abierta (igual que tickets y equipos):
-// los usuarios que cree el Administrator se pierden al cerrar la app.
+// Despues se guardan con Persistence (filesDir) y se restauran al abrir la app.
 class UserRepository(private val context: Context) {
     val lastError: String?
         get() = loadError
 
-    // Leer aqui dentro de un composable hace que se redibuje cuando cambian los usuarios
     fun getUsers(): List<User> {
         ensureLoaded(context)
         version.intValue
         return synchronized(lock) { store.toList() }
     }
-
-    // Id que recibira el proximo usuario creado
     fun nextUserId(): Long {
         ensureLoaded(context)
         version.intValue
@@ -36,7 +32,6 @@ class UserRepository(private val context: Context) {
     fun getActiveOperators(): List<User> =
         getUsers().filter { it.role == Role.Operator && it.active }
 
-    // Acepta el email o el id numerico del usuario en el primer campo
     fun authenticate(identifier: String, password: String): User? {
         val key = identifier.trim()
         return getUsers().firstOrNull {
@@ -46,7 +41,6 @@ class UserRepository(private val context: Context) {
         }
     }
 
-    // Crea un usuario con el siguiente id incremental. Si no se da email se genera uno.
     fun createUser(
         actor: User,
         name: String,
@@ -168,6 +162,12 @@ class UserRepository(private val context: Context) {
                 if (loaded) return
                 loaded = true
                 loadError = null
+                val saved = Persistence.loadUsers()
+                if (saved != null) {
+                    store.addAll(saved)
+                    nextId = (store.maxOfOrNull { it.idUser } ?: 0L) + 1
+                    return
+                }
                 try {
                     val json = context.assets.open("users.json")
                         .bufferedReader()

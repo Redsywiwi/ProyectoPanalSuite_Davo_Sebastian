@@ -20,9 +20,6 @@ enum class Permissions {
     ManageParameters
 }
 
-// defaultPermits son los permisos "de fabrica" de cada rol.
-// permits son los permisos vigentes: los de fabrica, salvo que el Administrator los haya editado.
-// Todo el codigo existente sigue usando role.permits sin cambios.
 enum class Role(val defaultPermits: Set<Permissions>) {
     CommonUser(
         setOf(Permissions.OpenTicket, Permissions.ViewTickets, Permissions.ViewHistory)
@@ -48,13 +45,20 @@ enum class Role(val defaultPermits: Set<Permissions>) {
         get() = RolePermissions.of(this)
 }
 
-// Permisos editables por rol. Viven en memoria mientras la app esta abierta.
 object RolePermissions {
     private val overrides = mutableStateMapOf<Role, Set<Permissions>>()
 
     // El Administrator siempre conserva estos permisos para no quedarse sin acceso al panel.
     val lockedForAdministrator: Set<Permissions> =
         setOf(Permissions.ManageUsers, Permissions.ManagePermissions, Permissions.ManageParameters)
+
+    fun snapshot(): Map<Role, Set<Permissions>> = overrides.toMap()
+
+    @Synchronized
+    fun restore(saved: Map<Role, Set<Permissions>>) {
+        overrides.clear()
+        overrides.putAll(saved)
+    }
 
     fun of(role: Role): Set<Permissions> = overrides[role] ?: role.defaultPermits
 

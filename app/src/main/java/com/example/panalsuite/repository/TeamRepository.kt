@@ -9,6 +9,15 @@ object TeamRepository {
     private val teams = mutableStateListOf<Team>()
     private var nextTeamId = 1L
 
+    fun snapshot(): List<Team> = teams.toList()
+
+    @Synchronized
+    fun restore(saved: List<Team>) {
+        teams.clear()
+        teams.addAll(saved)
+        nextTeamId = (saved.maxOfOrNull { it.idTeam } ?: 0L) + 1
+    }
+
     fun getTeams(): List<Team> = teams.sortedBy { it.name.lowercase() }
 
     fun getTeam(idTeam: Long): Team? = teams.firstOrNull { it.idTeam == idTeam }
