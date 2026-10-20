@@ -14,7 +14,7 @@ data class Ticket (
     var status: TicketStatus,  // y esto
     val createdAt: LocalDateTime,
     var lastUpdate: LocalDateTime,
-    val branch : String, //no estoy seguro si la sucursal puede cambiar asi que la dejo que no por default
+    val branch : Location, //arreglao gemelo wijiji
     var team : String?,//El ? es porque se puede dejar null
     var peopleInCharge : Long?,
     val commentary : MutableList<Commentary>,
