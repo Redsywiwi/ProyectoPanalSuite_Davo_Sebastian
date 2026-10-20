@@ -36,6 +36,7 @@ import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -71,17 +72,24 @@ import com.example.panalsuite.R
 import com.example.panalsuite.ui.components.ScreenBackground
 import com.example.panalsuite.ui.theme.PanalSuiteTheme
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.rounded.*
+import com.example.panalsuite.model.User
 import androidx.compose.ui.res.painterResource
-
-private val ContentMaxWidth = 420.dp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.ImageDecoderDecoder // Para API 28+
+import android.os.Build
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import android.media.MediaPlayer
 private val FieldShape = RoundedCornerShape(16.dp)
 private val CardShape = RoundedCornerShape(28.dp)
 
 // Las animaciones gemelo, en milisegundos
 
-private const val ENTRANCE_DURATION_MS = 500
-private const val ENTRANCE_DELAY_MS = 150
-private const val BUTTON_PRESSED_SCALE = 0.96f
 
 // https://developer.android.com/develop/ui/compose/animation/composables-modifiers?hl=es-419
 // LAS ANIMACIONES
@@ -89,12 +97,16 @@ private const val BUTTON_PRESSED_SCALE = 0.96f
 fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
     errorMessage: String? = null,
+    testUsers: List<User> = emptyList(),
+    testUsersError: String? = null,
     modifier: Modifier = Modifier
 ){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
     var isContentVisible by remember { mutableStateOf(false) }
+    var showTestMenu by rememberSaveable { mutableStateOf(false) }
+    var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { isContentVisible = true }
 
@@ -104,6 +116,22 @@ fun LoginScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         ScreenBackground(imageRes = R.drawable.freljord)
+
+        if (showTestMenu) {
+            TestUsersDialog(
+                users = testUsers,
+                error = testUsersError,
+                onUserSelected = { user ->
+                    email = user.email
+                    password = user.password
+                    showTestMenu = false
+                },
+                onDismiss = { showTestMenu = false }
+            )
+        }
+        if (showForgotPassword) {
+            ForgotPasswordDialog(onDismiss = { showForgotPassword = false })
+        }
 
         Column(
             modifier = Modifier
@@ -116,7 +144,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DelayedEntrance(isVisible = isContentVisible, order = 0) {
-                LoginHeader()
+                LoginHeader(onLogoClick = { showTestMenu = true })
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -129,14 +157,9 @@ fun LoginScreen(
                     onPasswordChange = { password = it },
                     isPasswordVisible = isPasswordVisible,
                     onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible },
-                    onLoginClick = { onLoginClick(email, password) }
-                )
-            }
-            AnimatedVisibility(visible = errorMessage != null) {
-                Text(
-                    text = errorMessage.orEmpty(),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+                    onLoginClick = { onLoginClick(email, password) },
+                    onForgotPasswordClick = { showForgotPassword = true },
+                    errorMessage = errorMessage
                 )
             }
 
@@ -159,13 +182,13 @@ private fun DelayedEntrance(
     order: Int,
     content: @Composable () -> Unit
 ) {
-    val delayMillis = order * ENTRANCE_DELAY_MS
+    val delayMillis = order * 150
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(tween(ENTRANCE_DURATION_MS, delayMillis)) +
+        enter = fadeIn(tween(500, delayMillis)) +
                 slideInVertically(
-                    animationSpec = tween(ENTRANCE_DURATION_MS, delayMillis, FastOutSlowInEasing)
+                    animationSpec = tween(500, delayMillis, FastOutSlowInEasing)
                 )
     ) {
         content()
@@ -174,9 +197,9 @@ private fun DelayedEntrance(
 
 
 @Composable
-private fun LoginHeader() {
+private fun LoginHeader(onLogoClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Logo()
+        Logo(onClick = onLogoClick)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -199,12 +222,13 @@ private fun LoginHeader() {
 }
 
 @Composable
-private fun Logo() {
+private fun Logo(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(96.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -213,6 +237,101 @@ private fun Logo() {
             modifier = Modifier.size(70.dp)
         )
     }
+}
+@Composable
+private fun TestUsersDialog(
+    users: List<User>,
+    error: String?,
+    onUserSelected: (User) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.BugReport,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = { Text(text = stringResource(R.string.debug_menu_title)) },
+        text = {
+            Column {
+                if (users.isEmpty()) {
+                    Text(
+                        text = error ?: "No se cargo ningun usuario (users.json vacio o no encontrado)",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                users.forEach { user ->
+                    TextButton(
+                        onClick = { onUserSelected(user) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = user.role.name,
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.debug_menu_close))
+            }
+        }
+    )
+}
+
+@Composable
+private fun ForgotPasswordDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.risa).apply {
+            start()
+        }
+
+        onDispose {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        }
+    }
+
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(coil.decode.GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        text = {
+            AsyncImage(
+                model = R.drawable.gato,
+                imageLoader = imageLoader,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Fit
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.debug_menu_close))
+            }
+        }
+    )
 }
 
 @Composable
@@ -223,11 +342,13 @@ private fun LoginCard(
     onPasswordChange: (String) -> Unit,
     isPasswordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    errorMessage: String? = null
 ) {
     Card(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = 420.dp)
             .fillMaxWidth(),
         shape = CardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -246,21 +367,32 @@ private fun LoginCard(
                 onToggleVisibility = onTogglePasswordVisibility,
                 onDone = onLoginClick
             )
+            // ===============================================================================
+            // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
+            // ===============================================================================
+
+            // asumiria que si pero ni idea como implementarlo ahora
+
+            // aya 👍
 
             TextButton(
-                onClick = {
-                    // ===============================================================================
-                    // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
-                    // ===============================================================================
-
-                    // asumiria que si pero ni idea como implementarlo ahora
-                },
+                onClick = onForgotPasswordClick,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = stringResource(R.string.login_forgot_password))
             }
 
             LoginButton(onClick = onLoginClick)
+
+            AnimatedVisibility(visible = errorMessage != null) {
+                Text(
+                    text = errorMessage.orEmpty(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -339,7 +471,7 @@ private fun LoginButton(onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) BUTTON_PRESSED_SCALE else 1f,
+        targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "login_button_scale"
     )

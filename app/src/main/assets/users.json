@@ -1,28 +1,46 @@
 [
   { "idUser": 1,
-    "name": "Resi",
-    "lastName": "Raccoon",
-    "email": "resyracc@gmail.com",
-    "password": "owagemelo",
+    "name": "Redsy",
+    "lastName": "Shinobi de los juegos",
+    "email": "commonuser@gmail.com",
+    "password": "1",
     "role": "CommonUser",
     "active": true
   },
 
   { "idUser": 2,
-    "name": "Kofitto",
-    "lastName": "wah",
-    "email": "kofiwah6767@gmail.com",
-    "password": "chomp",
+    "name": "Kofi",
+    "lastName": "Wah",
+    "email": "operator@gmail.com",
+    "password": "1",
     "role": "Operator",
     "active": true
   },
 
   { "idUser": 3,
-    "name": "lai",
-    "lastName": "panson",
-    "email": "mishmish@gmail.com",
-    "password": "admin123",
+    "name": "Goku",
+    "lastName": "le gana",
+    "email": "supervisor@gmail.com",
+    "password": "1",
     "role": "Supervisor",
+    "active": true
+  },
+
+  { "idUser": 4,
+    "name": "Rambley",
+    "lastName": "the raccoon",
+    "email": "management@gmail.com",
+    "password": "1",
+    "role": "Management",
+    "active": true
+  },
+
+  { "idUser": 5,
+    "name": "Livelyapio",
+    "lastName": "Panzon",
+    "email": "admin@gmail.com",
+    "password": "1",
+    "role": "Administrator",
     "active": true
   }
 ]

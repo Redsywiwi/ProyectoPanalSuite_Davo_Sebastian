@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 
-private const val SCRIM_ALPHA = 0.35f //35% opacida
 
 @Composable
 fun ScreenBackground(
@@ -28,7 +27,7 @@ fun ScreenBackground(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(alpha = SCRIM_ALPHA))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.35f))
         )
     }
 }

@@ -11,12 +11,12 @@ val HoneyBackgroundLight = Color(0xFFFFF8EF)
 val HoneySurfaceLight = Color(0xFFFFFFFF)
 val HoneyOnSurfaceLight = Color(0xFF211A10)
 
-// Modo oscuro
-
-val HoneyPrimaryDark = Color(0xFFFFB950)
-val HoneyOnPrimaryDark = Color(0xFF442B00)
-val HoneySecondaryDark = Color(0xFFDCC2A0)
-val HoneyTertiaryDark = Color(0xFFB9CEA2)
-val HoneyBackgroundDark = Color(0xFF17130C)
-val HoneySurfaceDark = Color(0xFF221C12)
-val HoneyOnSurfaceDark = Color(0xFFEDE1D2)
+// Modo claro / contenedores y bordes
+val HoneyPrimaryContainerLight = Color(0xFFFFDDB3)
+val HoneyOnPrimaryContainerLight = Color(0xFF2A1700)
+val HoneySecondaryContainerLight = Color(0xFFF8DFBB)
+val HoneyOnSecondaryContainerLight = Color(0xFF261A04)
+val HoneySurfaceVariantLight = Color(0xFFF2E0CC)
+val HoneyOnSurfaceVariantLight = Color(0xFF51443A)
+val HoneyOutlineLight = Color(0xFF84746A)
+val HoneyOutlineVariantLight = Color(0xFFD5C3B5)
