@@ -53,6 +53,11 @@ object Persistence {
 
 
     fun restoreAll(context: Context) {
+        ParametersRepository.getCategories()
+        TicketRepository.snapshot()
+        TeamRepository.snapshot()
+        RolePermissions.snapshot()
+        UserRepository(context).getUsers()
         init(context)
         loadTickets()?.let { TicketRepository.restore(it) }
         loadTeams()?.let { TeamRepository.restore(it) }
