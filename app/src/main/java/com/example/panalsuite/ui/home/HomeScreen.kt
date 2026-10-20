@@ -17,19 +17,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.Construction
-import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -37,12 +33,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,56 +49,97 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.panalsuite.R
 import com.example.panalsuite.model.Role
+import com.example.panalsuite.model.Ticket
+import com.example.panalsuite.model.TicketFilters
 import com.example.panalsuite.model.User
 import com.example.panalsuite.repository.Session
+import com.example.panalsuite.repository.TicketRepository
 import com.example.panalsuite.ui.components.TicketCard
 import com.example.panalsuite.ui.theme.PanalSuiteTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
     onLogoutClick: () -> Unit,
+    onDrawerNavigate: (route: String) -> Unit = {},
+    onNewTicketClick: () -> Unit = {},
+    onTicketClick: (ticketId: Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user = Session.currentUser ?: return
     val tabs = remember(user.role) { user.role.bottomTabs() }
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    Scaffold(
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var filters by rememberSaveable(stateSaver = TicketFiltersSaver) { mutableStateOf(TicketFilters()) }
+
+    ModalNavigationDrawer(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index },
-                        icon = { Icon(imageVector = tab.icon, contentDescription = null) },
-                        label = { Text(text = stringResource(tab.label)) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        drawerState = drawerState,
+        drawerContent = {
+            HomeDrawerContent(
+                user = user,
+                onItemClick = { item ->
+                    scope.launch { drawerState.close() }
+                    onDrawerNavigate(item.route)
+                },
+                onLogoutClick = {
+                    scope.launch { drawerState.close() }
+                    onLogoutClick()
+                }
+            )
+        }
+    ) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            bottomBar = {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    tabs.forEachIndexed { index, tab ->
+                        NavigationBarItem(
+                            selected = selectedIndex == index,
+                            onClick = { selectedIndex = index },
+                            icon = { Icon(imageVector = tab.icon, contentDescription = null) },
+                            label = { Text(text = stringResource(tab.label)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
-                    )
+                    }
                 }
             }
-        }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (tabs[selectedIndex].type) {
-                TabType.HOME -> HomeContent(user)
-                TabType.TICKETS -> TicketsContent()
-                TabType.OTHER -> PlaceholderContent(tabs[selectedIndex])
-                TabType.PROFILE -> ProfileContent(user, onLogoutClick)
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                when (tabs[selectedIndex].type) {
+                    TabType.HOME -> HomeContent(
+                        user = user,
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onNewTicketClick = onNewTicketClick,
+                        onTicketClick = onTicketClick,
+                        filters = filters,
+                        onFiltersChange = { filters = it }
+                    )
+                    TabType.TICKETS -> TicketsContent(
+                        user = user,
+                        filters = filters,
+                        onFiltersChange = { filters = it },
+                        onTicketClick = onTicketClick
+                    )
+                    TabType.OTHER -> PlaceholderContent(tabs[selectedIndex])
+                    TabType.PROFILE -> ProfileContent(user, onLogoutClick)
+                }
             }
         }
     }
@@ -110,36 +150,86 @@ fun HomeScreen(
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun HomeContent(user: User) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        HomeHeader(name = user.name)
-        SearchBar()
-        RoleBanner(role = user.role)
-        PermissionsCard(role = user.role)
+private fun HomeContent(
+    user: User,
+    onMenuClick: () -> Unit,
+    onNewTicketClick: () -> Unit,
+    onTicketClick: (Long) -> Unit,
+    filters: TicketFilters,
+    onFiltersChange: (TicketFilters) -> Unit
+) {
+    val isCommonUser = user.role == Role.CommonUser
+    // Mientras hay busqueda/filtros activos se muestran los resultados en vez de "Recent"
+    val searching = isCommonUser && filters.isActive
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SectionTitle(
-                title = stringResource(R.string.home_recent_tickets),
-                action = stringResource(R.string.home_see_all)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    start = 20.dp,
+                    top = 12.dp,
+                    end = 20.dp,
+                    bottom = if (user.role == Role.CommonUser) 88.dp else 12.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            HomeHeader(name = user.name, role = user.role.name, onMenuClick = onMenuClick)
+            TicketSearchBar(filters = filters, onFiltersChange = onFiltersChange)
+            if (!searching) {
+                PinnedTicketsCard(userId = user.idUser, onTicketClick = onTicketClick)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionTitle(
+                    title = stringResource(
+                        if (searching) R.string.home_search_results else R.string.home_recent_tickets
+                    ),
+                    action = if (searching) null else stringResource(R.string.home_see_all)
+                )
+                if (isCommonUser) {
+                    // Siempre filtrado por el idUser de la sesion
+                    val shown = if (searching) {
+                        TicketRepository.searchTicketsByUser(user.idUser, filters)
+                    } else {
+                        TicketRepository.getTicketsByUser(user.idUser).take(3)
+                    }
+                    if (shown.isEmpty()) {
+                        EmptyStateText(
+                            text = stringResource(
+                                if (searching) R.string.tickets_no_results else R.string.tickets_empty
+                            )
+                        )
+                    } else {
+                        shown.forEach { ticket ->
+                            TicketCard(ticket = ticket, onClick = { onTicketClick(ticket.idTicket) })
+                        }
+                    }
+                } else {
+                    TicketCard()
+                }
+            }
+        }
+
+        if (user.role == Role.CommonUser) {
+            NewTicketButton(
+                onClick = onNewTicketClick,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp, bottom = 20.dp)
             )
-            TicketCard()
         }
     }
 }
 
 @Composable
-private fun HomeHeader(name: String) {
+private fun HomeHeader(name: String, role: String, onMenuClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* TODO: menu que se abre */ }) {
+        IconButton(onClick = onMenuClick) {
             Icon(
                 imageVector = Icons.Rounded.Menu,
                 contentDescription = null,
@@ -154,7 +244,7 @@ private fun HomeHeader(name: String) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = stringResource(R.string.home_greeting_subtitle),
+                text = stringResource(R.string.home_greeting_subtitle, role),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -170,95 +260,95 @@ private fun HomeHeader(name: String) {
 }
 
 @Composable
-private fun SearchBar() {
-    var query by rememberSaveable { mutableStateOf("") }
+private fun PinnedTicketsCard(userId: Long, onTicketClick: (Long) -> Unit) {
+    val pinnedTickets = TicketRepository.getPinnedTicketsByUser(userId)
 
-    Row(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            modifier = Modifier.weight(1f),
-            placeholder = { Text(text = stringResource(R.string.home_search_hint)) },
-            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = null) },
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        )
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            IconButton(onClick = { /* TODO: filtros de busqyueda */ }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Rounded.Tune,
+                    imageVector = Icons.Rounded.PushPin,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+                Text(
+                    text = stringResource(R.string.home_pinned_tickets),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            if (pinnedTickets.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.home_pinned_empty),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                pinnedTickets.forEach { ticket ->
+                    PinnedTicketRow(ticket = ticket, onClick = { onTicketClick(ticket.idTicket) })
+                }
             }
         }
     }
 }
 
 @Composable
-private fun RoleBanner(role: Role) {
-    Card(
+private fun PinnedTicketRow(ticket: Ticket, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
+            Text(
+                text = stringResource(R.string.ticket_number_format, ticket.idTicket),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = ticket.title,
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = stringResource(role.bannerTitle()),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = stringResource(role.bannerDescription()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Button(onClick = { /* TODO */ }) {
-                    Text(text = stringResource(R.string.home_banner_button))
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Dashboard,
-                    contentDescription = null,
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = ticket.priority.priorityName,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
+
+@Composable
+private fun EmptyStateText(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
 @Composable
 private fun PermissionsCard(role: Role) {
     Card(
@@ -317,7 +407,12 @@ private fun SectionTitle(title: String, action: String? = null) {
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun TicketsContent() {
+private fun TicketsContent(
+    user: User,
+    filters: TicketFilters,
+    onFiltersChange: (TicketFilters) -> Unit,
+    onTicketClick: (Long) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -325,7 +420,24 @@ private fun TicketsContent() {
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TicketCard()
+        if (user.role == Role.CommonUser) {
+            TicketSearchBar(filters = filters, onFiltersChange = onFiltersChange)
+
+            val myTickets = TicketRepository.searchTicketsByUser(user.idUser, filters)
+            if (myTickets.isEmpty()) {
+                EmptyStateText(
+                    text = stringResource(
+                        if (filters.isActive) R.string.tickets_no_results else R.string.tickets_empty
+                    )
+                )
+            } else {
+                myTickets.forEach { ticket ->
+                    TicketCard(ticket = ticket, onClick = { onTicketClick(ticket.idTicket) })
+                }
+            }
+        } else {
+            TicketCard()
+        }
     }
 }
 
@@ -380,10 +492,11 @@ private fun ProfileContent(user: User, onLogoutClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
         Box(
             modifier = Modifier
                 .size(96.dp)
@@ -415,12 +528,26 @@ private fun ProfileContent(user: User, onLogoutClick: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary
         )
+        Spacer(modifier = Modifier.height(24.dp))
+        PermissionsCard(role = user.role)
         Spacer(modifier = Modifier.height(32.dp))
         OutlinedButton(onClick = onLogoutClick) {
             Icon(imageVector = Icons.AutoMirrored.Rounded.Logout, contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))
             Text(text = stringResource(R.string.home_logout))
         }
+    }
+}
+@Composable
+private fun NewTicketButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(text = stringResource(R.string.home_new_ticket))
     }
 }
 

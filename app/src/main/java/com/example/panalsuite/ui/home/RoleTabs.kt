@@ -54,21 +54,3 @@ fun Role.bottomTabs(): List<BottomTab> = when (this) {
         ProfileTab
     )
 }
-
-@StringRes
-fun Role.bannerTitle(): Int = when (this) {
-    Role.CommonUser -> R.string.banner_title_common
-    Role.Operator -> R.string.banner_title_operator
-    Role.Supervisor -> R.string.banner_title_supervisor
-    Role.Management -> R.string.banner_title_management
-    Role.Administrator -> R.string.banner_title_admin
-}
-
-@StringRes
-fun Role.bannerDescription(): Int = when (this) {
-    Role.CommonUser -> R.string.banner_desc_common
-    Role.Operator -> R.string.banner_desc_operator
-    Role.Supervisor -> R.string.banner_desc_supervisor
-    Role.Management -> R.string.banner_desc_management
-    Role.Administrator -> R.string.banner_desc_admin
-}

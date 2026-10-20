@@ -73,11 +73,18 @@ import com.example.panalsuite.ui.components.ScreenBackground
 import com.example.panalsuite.ui.theme.PanalSuiteTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.*
 import com.example.panalsuite.model.User
 import androidx.compose.ui.res.painterResource
-
-
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.ImageDecoderDecoder // Para API 28+
+import android.os.Build
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import android.media.MediaPlayer
 private val FieldShape = RoundedCornerShape(16.dp)
 private val CardShape = RoundedCornerShape(28.dp)
 
@@ -99,6 +106,7 @@ fun LoginScreen(
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
     var isContentVisible by remember { mutableStateOf(false) }
     var showTestMenu by rememberSaveable { mutableStateOf(false) }
+    var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { isContentVisible = true }
 
@@ -120,6 +128,9 @@ fun LoginScreen(
                 },
                 onDismiss = { showTestMenu = false }
             )
+        }
+        if (showForgotPassword) {
+            ForgotPasswordDialog(onDismiss = { showForgotPassword = false })
         }
 
         Column(
@@ -146,14 +157,9 @@ fun LoginScreen(
                     onPasswordChange = { password = it },
                     isPasswordVisible = isPasswordVisible,
                     onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible },
-                    onLoginClick = { onLoginClick(email, password) }
-                )
-            }
-            AnimatedVisibility(visible = errorMessage != null) {
-                Text(
-                    text = errorMessage.orEmpty(),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+                    onLoginClick = { onLoginClick(email, password) },
+                    onForgotPasswordClick = { showForgotPassword = true },
+                    errorMessage = errorMessage
                 )
             }
 
@@ -282,6 +288,53 @@ private fun TestUsersDialog(
 }
 
 @Composable
+private fun ForgotPasswordDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.risa).apply {
+            start()
+        }
+
+        onDispose {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        }
+    }
+
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(coil.decode.GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        text = {
+            AsyncImage(
+                model = R.drawable.gato,
+                imageLoader = imageLoader,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Fit
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.debug_menu_close))
+            }
+        }
+    )
+}
+
+@Composable
 private fun LoginCard(
     email: String,
     onEmailChange: (String) -> Unit,
@@ -289,7 +342,9 @@ private fun LoginCard(
     onPasswordChange: (String) -> Unit,
     isPasswordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    errorMessage: String? = null
 ) {
     Card(
         modifier = Modifier
@@ -312,23 +367,32 @@ private fun LoginCard(
                 onToggleVisibility = onTogglePasswordVisibility,
                 onDone = onLoginClick
             )
+            // ===============================================================================
+            // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
+            // ===============================================================================
+
+            // asumiria que si pero ni idea como implementarlo ahora
+
+            // aya 👍
 
             TextButton(
-                onClick = {
-                    // ===============================================================================
-                    // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
-                    // ===============================================================================
-
-                    // asumiria que si pero ni idea como implementarlo ahora
-
-                    // aya 👍
-                },
+                onClick = onForgotPasswordClick,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(text = stringResource(R.string.login_forgot_password))
             }
 
             LoginButton(onClick = onLoginClick)
+
+            AnimatedVisibility(visible = errorMessage != null) {
+                Text(
+                    text = errorMessage.orEmpty(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
