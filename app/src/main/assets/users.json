@@ -1,0 +1,28 @@
+[
+  { "idUser": 1,
+    "name": "Resi",
+    "lastName": "Raccoon",
+    "email": "resyracc@gmail.com",
+    "password": "owagemelo",
+    "role": "CommonUser",
+    "active": true
+  },
+
+  { "idUser": 2,
+    "name": "Kofitto",
+    "lastName": "wah",
+    "email": "kofiwah6767@gmail.com",
+    "password": "chomp",
+    "role": "Operator",
+    "active": true
+  },
+
+  { "idUser": 3,
+    "name": "lai",
+    "lastName": "panson",
+    "email": "mishmish@gmail.com",
+    "password": "admin123",
+    "role": "Supervisor",
+    "active": true
+  }
+]

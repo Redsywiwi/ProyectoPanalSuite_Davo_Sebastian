@@ -24,8 +24,6 @@ enum class Role(val permits: Set<Permissions>){
         )
     ),
     Supervisor(
-        //antes de cualquier cosa aquí se pondría setOf<permisos>() pero como hay un solo tipo de dato
-        //el programa infiere que es solamente Permiso
       Operator.permits + setOf(
           Permissions.SeeWorkload, Permissions.Reassign
       )

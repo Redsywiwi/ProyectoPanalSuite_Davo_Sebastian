@@ -7,6 +7,6 @@ data class DevelopmentHistory (
     val modifiedField : String,
     val previousValue : String,
     val newValue : String,
-    val user : Long,
+    val idUser : Long,
     val date : LocalDateTime
 )

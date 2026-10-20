@@ -88,6 +88,16 @@ fun HomeScreen(
     }
 }
 
+fun Column(
+    modifier: androidx.compose.ui.Modifier,
+    verticalArrangement: androidx.compose.foundation.layout.Arrangement.HorizontalOrVertical,
+    horizontalAlignment: androidx.compose.ui.Alignment.Horizontal,
+    content: () -> Unit
+) {
+}
+
+fun Box(modifier: Modifier, content: () -> Unit) {}
+
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {

@@ -87,9 +87,10 @@ private const val BUTTON_PRESSED_SCALE = 0.96f
 // LAS ANIMACIONES
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
+    onLoginClick: (email: String, password: String) -> Unit,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier
-) {
+){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
@@ -128,7 +129,14 @@ fun LoginScreen(
                     onPasswordChange = { password = it },
                     isPasswordVisible = isPasswordVisible,
                     onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible },
-                    onLoginClick = onLoginClick
+                    onLoginClick = { onLoginClick(email, password) }
+                )
+            }
+            AnimatedVisibility(visible = errorMessage != null) {
+                Text(
+                    text = errorMessage.orEmpty(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
@@ -163,6 +171,7 @@ private fun DelayedEntrance(
         content()
     }
 }
+
 
 @Composable
 private fun LoginHeader() {
@@ -243,6 +252,8 @@ private fun LoginCard(
                     // ===============================================================================
                     // Sera necesario un recuperar contraseñas o no? si no borra este text button noma
                     // ===============================================================================
+
+                    // asumiria que si pero ni idea como implementarlo ahora
                 },
                 modifier = Modifier.align(Alignment.End)
             ) {
@@ -362,6 +373,6 @@ private fun LoginButton(onClick: () -> Unit) {
 @Composable
 private fun LoginScreenPreview() {
     PanalSuiteTheme {
-        LoginScreen(onLoginClick = {})
+        LoginScreen(onLoginClick = {_ , _ -> })
     }
 }

@@ -5,6 +5,7 @@ data class User (
     val name: String,
     val lastName: String,
     var email: String,
+    var password: String,
     var role: Role,
     var active: Boolean
     //se asigna uno de los roles y de ahi con un if se decide que puede acceder y que no wijiji
