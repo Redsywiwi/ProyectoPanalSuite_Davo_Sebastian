@@ -21,6 +21,7 @@ fun AppNavigation(
 ) {
     val context = LocalContext.current
     val userRepository = remember { UserRepository(context) }
+    val testUsers = remember { userRepository.getUsers() }
     var loginError by remember { mutableStateOf<String?>(null) }
 
     NavHost(
@@ -30,6 +31,8 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreen(
                 errorMessage = loginError,
+                testUsers = testUsers,
+                testUsersError = userRepository.lastError,
                 onLoginClick = { email, password ->
                     val user = userRepository.authenticate(email.trim(), password)
                     if (user != null) {
@@ -39,7 +42,7 @@ fun AppNavigation(
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     } else {
-                        loginError = "Correo o contraseña incorrectos"
+                        loginError = "Wrong Email/Password"
                     }
                 }
             )

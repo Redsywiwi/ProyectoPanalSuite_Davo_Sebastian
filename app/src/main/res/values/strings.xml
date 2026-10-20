@@ -1,14 +1,59 @@
 <resources>
+    <!-- LOGIN -->
     <string name="app_name">PanalSuite</string>
-    <string name="login_subtitle">Subtitulo de login</string>
-    <string name="login_email_label">Correo electrónico</string>
-    <string name="login_password_label">Contraseña</string>
-    <string name="login_show_password">Mostrar contraseña</string>
-    <string name="login_hide_password">Ocultar contraseña</string>
-    <string name="login_forgot_password">¿Olvidaste tu contraseña?</string>
-    <string name="login_button">Iniciar sesión</string>
-    <string name="login_footer">LOGIN DE FOOTER</string>
-    <string name="home_title">Pantalla principal</string>
+    <string name="login_subtitle">Login subtitle</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_button">Login</string>
+    <string name="login_footer">Login footer</string>
+    <string name="home_title">Homescreen</string>
     <string name="home_placeholder">WIP :3c</string>
-    <string name="home_logout">Cerrar sesión</string>
+    <string name="home_logout">Logout</string>
+    <string name="debug_menu_title">Test users</string>
+    <string name="debug_menu_close">Close</string>
+
+    <!-- Menus -->
+    <string name="tab_home">Home</string>
+    <string name="tab_my_tickets">My tickets</string>
+    <string name="tab_assigned">Assigned tickets</string>
+    <string name="tab_team">Team</string>
+    <string name="tab_summary">Summary</string>
+    <string name="tab_manage">Manage</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Welcome, %1$s!</string>
+    <string name="home_greeting_subtitle">subtitle</string>
+    <string name="home_search_hint">Search</string>
+    <string name="home_banner_button">Details</string>
+    <string name="home_permissions_title">%1$s Permissions</string>
+    <string name="home_recent_tickets">Recent Tickets</string>
+    <string name="home_see_all">See All</string>
+    <string name="home_wip">WIP</string>
+
+    <string name="banner_title_common">My tickets</string>
+    <string name="banner_desc_common">My tickets desc.</string>
+    <string name="banner_title_operator">Assigned tickets</string>
+    <string name="banner_desc_operator">Assigned desc.</string>
+    <string name="banner_title_supervisor">Team management</string>
+    <string name="banner_desc_supervisor">Team management desc.</string>
+    <string name="banner_title_management">Summary</string>
+    <string name="banner_desc_management">Summary desc.</string>
+    <string name="banner_title_admin">Manage</string>
+    <string name="banner_desc_admin">Manage desc.</string>
+
+    <!-- Ticket cards -->
+    <string name="ticket_number_placeholder">Ticket Nº</string>
+    <string name="ticket_status_placeholder">Status</string>
+    <string name="ticket_title_placeholder">Ticket Title</string>
+    <string name="ticket_description_placeholder">Ticket desc.</string>
+    <string name="ticket_priority_placeholder">Ticket Priority</string>
+    <string name="ticket_assigned_placeholder">Assigned</string>
+    <string name="ticket_updated_placeholder">Last update</string>
+
+    <!-- Profile -->
+    <string name="profile_role">Role: %1$s</string>
 </resources>
